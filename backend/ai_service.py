@@ -3,7 +3,7 @@ import json
 import time
 import urllib.parse
 from dotenv import load_dotenv
-from models import RecipeResponse, RecipeRequest, NutritionFacts, Ingredient as ModelIngredient, RecipeStep
+from models import RecipeResponse, RecipeRequest, Nutrition, Ingredient as ModelIngredient, RecipeStep
 from typing import List, Dict
 from google import genai
 from google.genai import types
@@ -124,7 +124,7 @@ Return ONLY valid JSON matching this schema:
                     RecipeStep(step_number=step.get("step_number", idx+1), instruction=step.get("instruction", ""))
                     for idx, step in enumerate(recipe_data.get("steps", []))
                 ],
-                nutrition_facts=NutritionFacts(
+                nutrition_facts=Nutrition(
                     calories=float(n_facts.get("calories", 0)),
                     protein=float(n_facts.get("protein", 0)),
                     carbohydrates=float(n_facts.get("carbohydrates", 0)),
