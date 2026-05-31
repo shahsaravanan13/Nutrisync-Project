@@ -124,6 +124,17 @@ Reference Context:
                 self._save_history(recipe_name)
 
                 # 4. Strictly inject the mathematically calculated accurate nutrition facts
+                # Calculate from the EXACT quantities the LLM returned
+                generated_ingredients = []
+                for ing in recipe_data.get("ingredients_used", []):
+                    qty = ing.get("quantity", "")
+                    name = ing.get("name", "")
+                    generated_ingredients.append(f"{qty} {name}".strip())
+                
+                # Recalculate based on generated items
+                exact_calc_result = calculate_nutrition(generated_ingredients)
+                calculated_totals = exact_calc_result["total"]
+
                 recipe_data["nutrition_facts"] = {
                     "calories": calculated_totals["calories"],
                     "protein": calculated_totals["protein"],
@@ -185,5 +196,25 @@ Reference Context:
         url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=1024&seed={seed}&model=flux&nologo=true&private=true"
         print(f"Generated Image URL: {url}")
         return url
+
+    def chat(self, user_message: str, history: List[Dict[str, str]] = None) -> str:
+        messages = [
+            {"role": "system", "content": "You are NutriBot, a helpful, encouraging, and expert AI nutritionist and chef. You give concise, actionable advice about healthy eating, meal prep, and nutrition. Keep answers relatively brief (1-3 paragraphs) as this is for a mobile app chat interface. Format your answers clearly without using heavy markdown features like tables, but bullet points are fine."}
+        ]
+        if history:
+            messages.extend(history[-10:]) # keep last 10 messages for context
+            
+        messages.append({"role": "user", "content": user_message})
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model_name,
+                messages=messages,
+                temperature=0.7,
+                max_tokens=512,
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            return f"I'm sorry, I encountered an error: {str(e)}"
 
 gemini_service = GeminiService()

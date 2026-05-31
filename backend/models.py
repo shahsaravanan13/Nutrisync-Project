@@ -28,3 +28,10 @@ class RecipeRequest(BaseModel):
     ingredients: List[str] = Field(..., min_items=1, example=["chicken", "onion", "garlic"])
     num_ingredients: Optional[int] = Field(None, description="Optional limit on number of ingredients to use")
     dietary_preferences: Optional[str] = Field(None, example="Low carb, Keto, Vegan")
+
+class ChatRequest(BaseModel):
+    message: str
+    history: Optional[List[dict]] = None
+
+class ChatResponse(BaseModel):
+    response: str

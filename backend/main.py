@@ -11,7 +11,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(BASE_DIR, ".env"), override=True)
 
 # Import local modules
-from models import RecipeRequest, RecipeResponse
+from models import RecipeRequest, RecipeResponse, ChatRequest, ChatResponse
 from vector_db import VectorDB
 from ai_service import GeminiService
 
@@ -111,6 +111,18 @@ async def generate_recipe(request: RecipeRequest):
         print(f"Error Type: {type(e).__name__}")
         print(f"Error Message: {str(e)}")
         # Print the full traceback so we can see the exact line that failed
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/v1/chat", response_model=ChatResponse)
+async def chat_with_bot(request: ChatRequest):
+    if gemini is None:
+        raise HTTPException(status_code=503, detail="Services not initialized")
+    
+    try:
+        response_text = gemini.chat(request.message, request.history)
+        return ChatResponse(response=response_text)
+    except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
