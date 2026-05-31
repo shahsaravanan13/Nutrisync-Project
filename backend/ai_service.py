@@ -21,8 +21,8 @@ class GeminiService:
         if not api_key:
             raise ValueError("GEMINI_API_KEY is missing from environment variables.")
         self.client = genai.Client(api_key=api_key)
-        # Use gemini-1.5-flash as the default robust model
-        self.model_name = "gemini-1.5-flash"
+        # Use gemini-2.5-flash as the default robust model
+        self.model_name = "gemini-2.5-flash"
 
     def _get_history(self) -> List[str]:
         if os.path.exists(HISTORY_FILE):
