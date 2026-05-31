@@ -598,12 +598,36 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildRecipeCard(Map<String, dynamic> recipe, int index) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: AppTheme.softShadow,
-      ),
+    return GestureDetector(
+      onTap: () {
+        // Parse time and cal for mock recipe
+        final timeStr = recipe['time'].toString().replaceAll(RegExp(r'[^0-9]'), '');
+        final time = int.tryParse(timeStr) ?? 15;
+        final calStr = recipe['cal'].toString().replaceAll(RegExp(r'[^0-9]'), '');
+        final calories = double.tryParse(calStr) ?? 300.0;
+        
+        final mockRecipe = RecipeResponse(
+          recipeName: recipe['name'] as String,
+          totalTime: time,
+          ingredientsUsed: [
+            Ingredient(name: 'Main Ingredient', quantity: 'As needed'),
+            Ingredient(name: 'Spices', quantity: 'To taste'),
+          ],
+          steps: [
+            RecipeStep(stepNumber: 1, instruction: 'Prepare the ingredients.'),
+            RecipeStep(stepNumber: 2, instruction: 'Cook and serve warm.'),
+          ],
+          nutritionFacts: NutritionFacts(calories: calories, protein: 15, carbohydrates: 30, fat: 10, fiber: 5),
+          imageUrl: recipe['image'] as String?,
+        );
+        Navigator.push(context, MaterialPageRoute(builder: (_) => RecipeDetailScreen(recipe: mockRecipe)));
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: AppTheme.softShadow,
+        ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
