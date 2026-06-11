@@ -189,7 +189,19 @@ Return ONLY valid JSON matching this schema:
                     system_instruction=system_instruction
                 )
             )
-            return response.text
+            # gemini-2.5-flash uses thinking tokens; .text may be None if thinking-only
+            # Safely extract the text from candidates/parts
+            text = response.text
+            if text:
+                return text
+            # Fallback: manually extract from candidates
+            if response.candidates:
+                for candidate in response.candidates:
+                    if candidate.content and candidate.content.parts:
+                        for part in candidate.content.parts:
+                            if hasattr(part, 'text') and part.text:
+                                return part.text
+            return "I'm thinking... please ask me again!"
         except Exception as e:
             error_str = str(e)
             if "503" in error_str or "UNAVAILABLE" in error_str:
